@@ -204,34 +204,30 @@
   #searchInput:focus + .sicon ~ kbd{opacity:0;}
   #searchResults{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);
     border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-3);
-    max-height:min(64vh,440px);overflow-y:auto;z-index:40;display:none;padding:4px;}
+    max-height:min(64vh,420px);overflow-y:auto;z-index:40;display:none;padding:5px;}
   #searchResults.show{display:block;}
-  .rgroup{font-size:9px;font-weight:750;letter-spacing:.09em;color:var(--muted);
-    text-transform:uppercase;padding:10px 12px 3px;display:flex;align-items:center;gap:8px;}
-  .rgroup::after{content:'';flex:1;height:1px;background:var(--border);}
-  .rgroup:first-child{padding-top:6px;}
-  .ritem{padding:7px 10px;cursor:pointer;border-radius:8px;display:grid;
-    grid-template-columns:1fr auto;grid-template-rows:auto auto;
-    column-gap:8px;row-gap:1px;transition:background .12s;}
+  .rgroup{font-size:9.5px;font-weight:750;letter-spacing:.08em;color:var(--muted);
+    text-transform:uppercase;padding:8px 10px 4px;}
+  .ritem{padding:8px 10px;font-size:12.5px;cursor:pointer;border-radius:8px;
+    display:flex;flex-direction:column;gap:2px;}
   .ritem:hover,.ritem.active{background:var(--bg2);}
-  .ritem .rn{font-size:13px;font-weight:640;color:var(--text);
-    display:flex;align-items:center;gap:6px;min-width:0;grid-column:1;grid-row:1;}
-  .ritem .rn .rntext{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .ritem .rn mark{background:var(--accent-soft);color:var(--accent);
-    border-radius:3px;padding:0 2px;font-style:normal;}
-  .ritem .rt{font-size:8px;font-weight:750;letter-spacing:.05em;padding:2px 7px;
-    border-radius:20px;flex:none;white-space:nowrap;grid-column:2;grid-row:1;align-self:center;}
-  .ritem .rp{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;
-    text-overflow:ellipsis;grid-column:1 / span 2;grid-row:2;line-height:1.4;}
-  .ritem .rsnip-row{grid-column:1 / span 2;grid-row:3;display:flex;align-items:baseline;
-    gap:5px;margin-top:2px;}
+  .ritem .rn{font-weight:620;color:var(--text);display:flex;align-items:center;gap:6px;
+    white-space:nowrap;overflow:hidden;}
+  .ritem .rn mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;
+    padding:0 1px;font-style:normal;}
+  .ritem .rt{font-size:8.5px;font-weight:750;letter-spacing:.06em;padding:1.5px 6px;
+    border-radius:5px;flex:none;}
+  .ritem .rp{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;}
+  .ritem .rsnip-row{display:flex;align-items:center;gap:5px;margin-top:1px;}
   .ritem .rsnip-lbl{font-size:8px;font-weight:750;letter-spacing:.07em;text-transform:uppercase;
-    color:#fff;background:var(--accent);border-radius:20px;padding:1.5px 6px;flex:none;line-height:1.5;}
-  .ritem .rsnip{font-size:10.5px;color:var(--text2);line-height:1.4;overflow:hidden;
-    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;min-width:0;}
-  .ritem .rsnip mark{background:var(--accent-soft);color:var(--accent);
-    border-radius:3px;padding:0 2px;font-style:normal;}
-  .rempty{padding:18px;font-size:12px;color:var(--muted);text-align:center;}
+    color:var(--accent);background:var(--accent-soft);border-radius:4px;
+    padding:1px 5px;flex:none;white-space:nowrap;}
+  .ritem .rsnip{font-size:10.5px;color:var(--muted);overflow:hidden;white-space:nowrap;
+    text-overflow:ellipsis;min-width:0;}
+  .ritem .rsnip mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;
+    padding:0 1px;font-style:normal;}
+  .rempty{padding:16px;font-size:12px;color:var(--muted);text-align:center;}
 
   .iconbtn{flex:none;width:31px;height:31px;border-radius:9px;border:1px solid var(--border-strong);
     background:var(--card);color:var(--text2);font-size:13px;cursor:pointer;
@@ -1134,9 +1130,10 @@ sIn.addEventListener('input', ()=>{
     const meta = CAT[m.n.cat] || {c:'var(--muted)', s:'var(--bg2)', l:'Root'};
     const path = m.n._path.slice(1).join(' › ') || '—';
     out += '<div class=”ritem'+(i===active?' active':'')+'” data-i=”'+i+'”>'
-        +  '<div class=”rn”><span class=”rntext”>'+hi(m.n.name, q)+'</span></div>'
+        +  '<div class=”rn”>'+hi(m.n.name, q)
         +  (m.n.abbr ? '<span class=”rt” style=”background:'+meta.s+';color:'+meta.c+'”>'+esc(m.n.abbr)+'</span>' : '')
-        +  (path && path !== '—' ? '<div class=”rp”>'+esc(path)+'</div>' : '')
+        +  '</div>'
+        +  '<div class=”rp”>'+esc(path)+'</div>'
         +  (m.snip ? '<div class=”rsnip-row”><span class=”rsnip-lbl”>'+esc(m.snip.label)+'</span><span class=”rsnip”>'+m.snip.html+'</span></div>' : '')
         +  '</div>';
   });
