@@ -215,7 +215,6 @@
   .ritem .rn mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 1px;}
   .ritem .rt{font-size:8.5px;font-weight:750;letter-spacing:.06em;padding:1.5px 6px;border-radius:5px;flex:none;}
   .ritem .rp{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .ritem .rp mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 1px;}
   .rempty{padding:16px;font-size:12px;color:var(--muted);text-align:center;}
 
   .iconbtn{flex:none;width:31px;height:31px;border-radius:9px;border:1px solid var(--border-strong);
@@ -1056,48 +1055,22 @@ document.getElementById('introLegend').innerHTML =
 /* ================= search ================= */
 const sIn = document.getElementById('searchInput'), sRes = document.getElementById('searchResults');
 let matches = [], active = -1;
-function snippet(text, q, maxLen){
-  maxLen = maxLen || 72;
-  const i = text.toLowerCase().indexOf(q);
-  if(i < 0) return null;
-  const start = Math.max(0, i - 28);
-  const end   = Math.min(text.length, i + q.length + 44);
-  let s = (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
-  const si = s.toLowerCase().indexOf(q);
-  if(si < 0) return esc(s);
-  return esc(s.slice(0,si))+'<mark>'+esc(s.slice(si,si+q.length))+'</mark>'+esc(s.slice(si+q.length));
-}
-function findSnippet(n, q){
-  const peopleArr = [n.head, n.minister].concat(n.leads||[]).filter(Boolean);
-  for(const p of peopleArr){ const s = snippet(p, q); if(s) return {label:'Person', html:s}; }
-  if(n.desc){ const s = snippet(n.desc, q); if(s) return {label:'Description', html:s}; }
-  for(const w of (n.wings||[])){ const s = snippet(w, q); if(s) return {label:'Wing', html:s}; }
-  for(const sv of (n.services||[])){ const s = snippet(sv, q); if(s) return {label:'Service', html:s}; }
-  for(const cb of (n.cabinet||[])){ const s = snippet(cb, q); if(s) return {label:'Portfolio', html:s}; }
-  if(n.related){ const s = snippet(n.related, q); if(s) return {label:'Related', html:s}; }
-  if(n.note){ const s = snippet(n.note, q); if(s) return {label:'Note', html:s}; }
-  return null;
-}
-function scoreAndSnippet(n, q){
+function score(n, q){
   const nm = n.name.toLowerCase(), ab = (n.abbr||'').toLowerCase();
-  if(ab === q) return {s:0, snip:null};
-  if(nm === q) return {s:1, snip:null};
-  if(nm.startsWith(q)) return {s:2, snip:null};
-  if(ab.startsWith(q)) return {s:3, snip:null};
-  if(nm.includes(q)) return {s:4, snip:null};
-  if(ab.includes(q)) return {s:5, snip:null};
-  const peopleArr = [n.head, n.minister].concat(n.leads||[]).filter(Boolean);
-  const peopleStr = peopleArr.join(' ').toLowerCase();
-  if(peopleStr.includes(q)){
-    const snip = findSnippet(n, q);
-    return {s:6, snip};
-  }
-  if((n.desc||'').toLowerCase().includes(q)) return {s:7, snip:findSnippet(n,q)};
+  if(ab === q) return 0;
+  if(nm === q) return 1;
+  if(nm.startsWith(q)) return 2;
+  if(ab.startsWith(q)) return 3;
+  if(nm.includes(q)) return 4;
+  if(ab.includes(q)) return 5;
+  const people = [n.head, n.minister].concat(n.leads||[]).filter(Boolean).join(' ').toLowerCase();
+  if(people.includes(q)) return 6;
+  if((n.desc||'').toLowerCase().includes(q)) return 7;
   const lists = (n.wings||[]).concat(n.services||[]).concat(n.cabinet||[]);
-  if(lists.join(' ').toLowerCase().includes(q)) return {s:8, snip:findSnippet(n,q)};
-  if((n.related||'').toLowerCase().includes(q)) return {s:9, snip:findSnippet(n,q)};
-  if((n.note||'').toLowerCase().includes(q)) return {s:10, snip:findSnippet(n,q)};
-  return {s:-1, snip:null};
+  if(lists.join(' ').toLowerCase().includes(q)) return 8;
+  if((n.related||'').toLowerCase().includes(q)) return 9;
+  if((n.note||'').toLowerCase().includes(q)) return 10;
+  return -1;
 }
 function hi(text, q){
   const i = text.toLowerCase().indexOf(q);
@@ -1107,8 +1080,7 @@ function hi(text, q){
 sIn.addEventListener('input', ()=>{
   const q = sIn.value.trim().toLowerCase();
   if(q.length < 2){ sRes.classList.remove('show'); matches = []; return; }
-  matches = flat.map(n=>{ const r = scoreAndSnippet(n,q); return r.s >= 0 ? {n, s:r.s, snip:r.snip} : null; })
-                .filter(Boolean)
+  matches = flat.map(n=>({n, s:score(n,q)})).filter(x=>x.s >= 0)
                 .sort((a,b)=>a.s-b.s || a.n.name.length-b.n.name.length).slice(0,40);
   active = matches.length ? 0 : -1;
   if(!matches.length){ sRes.innerHTML = '<div class=”rempty”>Nothing matches “'+esc(sIn.value)+'”</div>'; sRes.classList.add('show'); return; }
@@ -1118,13 +1090,10 @@ sIn.addEventListener('input', ()=>{
     if(root !== lastRoot){ out += '<div class=”rgroup”>'+esc(root)+'</div>'; lastRoot = root; }
     const meta = CAT[m.n.cat] || {c:'var(--muted)', s:'var(--bg2)', l:'Root'};
     const path = m.n._path.slice(1).join(' › ') || '—';
-    const sub = m.snip ? m.snip.html : esc(path);
     out += '<div class=”ritem'+(i===active?' active':'')+'” data-i=”'+i+'”>'
         +  '<div class=”rn”>'+hi(m.n.name, q)
         +  (m.n.abbr ? '<span class=”rt” style=”background:'+meta.s+';color:'+meta.c+'”>'+esc(m.n.abbr)+'</span>' : '')
-        +  '</div>'
-        +  '<div class=”rp”>'+sub+'</div>'
-        +  '</div>';
+        +  '</div><div class=”rp”>'+esc(path)+'</div></div>';
   });
   sRes.innerHTML = out; sRes.classList.add('show');
 });
