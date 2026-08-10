@@ -1083,17 +1083,17 @@ sIn.addEventListener('input', ()=>{
   matches = flat.map(n=>({n, s:score(n,q)})).filter(x=>x.s >= 0)
                 .sort((a,b)=>a.s-b.s || a.n.name.length-b.n.name.length).slice(0,40);
   active = matches.length ? 0 : -1;
-  if(!matches.length){ sRes.innerHTML = '<div class=”rempty”>Nothing matches “'+esc(sIn.value)+'”</div>'; sRes.classList.add('show'); return; }
+  if(!matches.length){ sRes.innerHTML = '<div class="rempty">Nothing matches "'+esc(sIn.value)+'"</div>'; sRes.classList.add('show'); return; }
   let out = '', lastRoot = null;
   matches.forEach((m,i)=>{
     const root = m.n._path[0] || m.n.name;
-    if(root !== lastRoot){ out += '<div class=”rgroup”>'+esc(root)+'</div>'; lastRoot = root; }
+    if(root !== lastRoot){ out += '<div class="rgroup">'+esc(root)+'</div>'; lastRoot = root; }
     const meta = CAT[m.n.cat] || {c:'var(--muted)', s:'var(--bg2)', l:'Root'};
     const path = m.n._path.slice(1).join(' › ') || '—';
-    out += '<div class=”ritem'+(i===active?' active':'')+'” data-i=”'+i+'”>'
-        +  '<div class=”rn”>'+hi(m.n.name, q)
-        +  (m.n.abbr ? '<span class=”rt” style=”background:'+meta.s+';color:'+meta.c+'”>'+esc(m.n.abbr)+'</span>' : '')
-        +  '</div><div class=”rp”>'+esc(path)+'</div></div>';
+    out += '<div class="ritem'+(i===active?' active':'')+'" data-i="'+i+'">'
+        +  '<div class="rn">'+hi(m.n.name, q)
+        +  (m.n.abbr ? '<span class="rt" style="background:'+meta.s+';color:'+meta.c+'">'+esc(m.n.abbr)+'</span>' : '')
+        +  '</div><div class="rp">'+esc(path)+'</div></div>';
   });
   sRes.innerHTML = out; sRes.classList.add('show');
 });
