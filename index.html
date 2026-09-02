@@ -1232,7 +1232,8 @@ mm.addEventListener('pointerdown', e=>{
 
 /* ================= keyboard ================= */
 document.addEventListener('keydown', e=>{
-  if(e.target.tagName === 'INPUT') return;
+  const tag = e.target.tagName;
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
   const k = e.key.toLowerCase();
   if(k === '/'){ e.preventDefault(); sIn.focus(); sIn.select(); }
   else if(k === 'escape'){ closeDetail(); document.getElementById('intro').classList.add('hide'); }
