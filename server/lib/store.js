@@ -181,7 +181,7 @@ function updateNode(identifier, fields) {
   if (node.cat === "root") throw new Error("cannot edit a root tree node");
   const editable = ["name", "desc", "abbr", "site", "leads", "cat"];
   for (const f of editable) {
-    if (fields[f] === undefined) continue;
+    if (fields[f] === undefined || fields[f] === null) continue;
     if (f === "cat" && !VALID_CATS.includes(fields.cat)) continue;
     if (f === "cat" && fields.cat === "root") continue;
     node[f] = fields[f];
