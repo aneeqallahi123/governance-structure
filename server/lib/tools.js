@@ -146,6 +146,10 @@ const toolDefs = [
   },
 ];
 
+function getToolDefs(includeWebSearch) {
+  return includeWebSearch ? toolDefs : toolDefs.filter((t) => t.function.name !== "web_search");
+}
+
 async function executeTool(name, args, ctx) {
   switch (name) {
     case "search_structure":
@@ -191,6 +195,7 @@ async function executeTool(name, args, ctx) {
     }
 
     case "web_search": {
+      if (!ctx.webSearchEnabled) return { error: "Web search is disabled for this conversation." };
       const result = await webSearch(args.query);
       ctx.sources.push(...result.sources);
       return result;
@@ -201,4 +206,4 @@ async function executeTool(name, args, ctx) {
   }
 }
 
-module.exports = { toolDefs, executeTool };
+module.exports = { toolDefs, getToolDefs, executeTool };

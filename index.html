@@ -417,6 +417,15 @@
     display:flex;align-items:center;gap:10px;}
   #chatHead .cti{font-family:var(--serif);font-size:16.5px;font-weight:700;flex:1;min-width:0;}
   #chatHead .cts{font-size:11.5px;color:var(--muted);display:block;font-weight:500;font-family:var(--font);margin-top:1px;}
+  #chatToolbar{flex:none;padding:9px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:flex-end;}
+  .wstoggle{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 6px;border-radius:20px;border:1px solid var(--border-strong);
+    background:var(--bg2);cursor:pointer;font-size:11.5px;font-weight:650;color:var(--text2);transition:background .15s,border-color .15s;}
+  .wstoggle .wsdot{width:26px;height:15px;border-radius:20px;background:var(--border-strong);position:relative;flex:none;transition:background .18s;}
+  .wstoggle .wsdot::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;
+    background:var(--card);transition:transform .18s var(--ease);box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .wstoggle[aria-pressed="true"]{border-color:var(--accent);color:var(--text);}
+  .wstoggle[aria-pressed="true"] .wsdot{background:var(--accent);}
+  .wstoggle[aria-pressed="true"] .wsdot::after{transform:translateX(11px);}
   #chatClose{width:29px;height:29px;border-radius:8px;border:1px solid var(--border-strong);background:var(--card);
     cursor:pointer;font-size:14px;color:var(--text2);display:flex;align-items:center;justify-content:center;
     transition:background .15s;flex:none;}
@@ -523,6 +532,12 @@
       <span class="cts">Ask questions, edit the structure, or search the web</span>
     </div>
     <button id="chatClose" title="Close">&#10005;</button>
+  </div>
+  <div id="chatToolbar">
+    <button type="button" id="webSearchToggle" class="wstoggle" aria-pressed="true" title="Let the assistant search the live web when needed">
+      <span class="wsdot"></span>
+      <span class="wslabel">Web search</span>
+    </button>
   </div>
   <div id="chatMsgs"></div>
   <form id="chatForm">
@@ -1295,10 +1310,31 @@ syncStructureFromServer();
   const form = document.getElementById('chatForm');
   const input = document.getElementById('chatInput');
   const sendBtn = document.getElementById('chatSend');
+  const webSearchBtn = document.getElementById('webSearchToggle');
 
   let history = [];
   let busy = false;
   let opened = false;
+  let webSearchEnabled = true;
+  try{
+    const stored = localStorage.getItem('gs_web_search_enabled');
+    if(stored !== null) webSearchEnabled = stored === '1';
+  }catch(e){}
+
+  function renderWebSearchToggle(){
+    webSearchBtn.setAttribute('aria-pressed', webSearchEnabled ? 'true' : 'false');
+    webSearchBtn.querySelector('.wslabel').textContent = 'Web search: ' + (webSearchEnabled ? 'On' : 'Off');
+    webSearchBtn.title = webSearchEnabled
+      ? 'Assistant can search the live web when needed — click to turn off'
+      : 'Web search is off — the assistant will only use the map data — click to turn on';
+  }
+  renderWebSearchToggle();
+  webSearchBtn.addEventListener('click', ()=>{
+    webSearchEnabled = !webSearchEnabled;
+    renderWebSearchToggle();
+    try{ localStorage.setItem('gs_web_search_enabled', webSearchEnabled ? '1' : '0'); }catch(e){}
+    addSystemMsg(webSearchEnabled ? 'Web search turned on.' : 'Web search turned off — answers will stick to the map data.');
+  });
 
   function open(){ panel.classList.add('open'); opened = true; dot.classList.remove('show'); input.focus(); }
   function close(){ panel.classList.remove('open'); }
@@ -1377,7 +1413,7 @@ syncStructureFromServer();
       const res = await fetch('/api/chat', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ message:text, history: history.slice(0,-1) })
+        body: JSON.stringify({ message:text, history: history.slice(0,-1), webSearch: webSearchEnabled })
       });
       hideTyping();
       const body = await res.json().catch(()=>({}));
