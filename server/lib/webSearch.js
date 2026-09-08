@@ -8,9 +8,14 @@ const { client, SEARCH_MODEL } = require("./groq");
  * — no separate search API key to provision.
  * https://console.groq.com/docs/compound
  */
+// Groq compound models reject queries over ~500 chars; trim to a safe limit.
+const MAX_QUERY_LENGTH = 400;
+
 async function webSearch(query) {
+  const safeQuery = typeof query === "string" ? query.slice(0, MAX_QUERY_LENGTH) : String(query).slice(0, MAX_QUERY_LENGTH);
   const completion = await client.chat.completions.create({
     model: SEARCH_MODEL,
+    max_tokens: 512,
     messages: [
       {
         role: "system",
@@ -20,7 +25,7 @@ async function webSearch(query) {
           "This is being used to answer questions about Pakistani federal/provincial government structure, " +
           "so prefer official/government/news sources when relevant.",
       },
-      { role: "user", content: query },
+      { role: "user", content: safeQuery },
     ],
   });
 
