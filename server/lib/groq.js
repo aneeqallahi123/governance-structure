@@ -10,6 +10,6 @@ if (!process.env.GROQ_API_KEY) {
 const client = new Groq({ apiKey: process.env.GROQ_API_KEY || "unset" });
 
 const CHAT_MODEL = process.env.GROQ_CHAT_MODEL || "openai/gpt-oss-120b";
-const SEARCH_MODEL = process.env.GROQ_SEARCH_MODEL || "groq/compound-mini";
+const SEARCH_MODEL = process.env.GROQ_SEARCH_MODEL || "compound-beta";
 
 module.exports = { client, CHAT_MODEL, SEARCH_MODEL };
