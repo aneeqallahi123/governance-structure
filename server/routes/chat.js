@@ -93,11 +93,11 @@ router.post("/", async (req, res) => {
     }
 
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      const isLastIter = i === MAX_TOOL_ITERATIONS - 1;
       const completion = await createCompletion({
         model: CHAT_MODEL,
         messages,
-        tools,
-        tool_choice: i === MAX_TOOL_ITERATIONS - 1 ? "none" : "auto",
+        ...(isLastIter ? {} : { tools, tool_choice: "auto" }),
         temperature: 0.3,
       });
 
