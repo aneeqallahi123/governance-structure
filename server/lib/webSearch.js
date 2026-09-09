@@ -15,15 +15,16 @@ async function webSearch(query) {
   const safeQuery = typeof query === "string" ? query.slice(0, MAX_QUERY_LENGTH) : String(query).slice(0, MAX_QUERY_LENGTH);
   const completion = await client.chat.completions.create({
     model: SEARCH_MODEL,
-    max_tokens: 512,
+    max_tokens: 1024,
     messages: [
       {
         role: "system",
         content:
           "You are a focused research assistant. Use web search to answer the user's query " +
-          "with current, accurate information. Be concise (under 200 words) and list the concrete facts found. " +
-          "This is being used to answer questions about Pakistani federal/provincial government structure, " +
-          "so prefer official/government/news sources when relevant.",
+          "with current, accurate information. Report what you find — do not hedge or refuse if sources exist. " +
+          "List the concrete facts found (name, mandate, leadership, website) in under 300 words. " +
+          "This is used to look up Pakistani federal/provincial government bodies; " +
+          "prefer official government portals, gazette notifications, and reputable news sources.",
       },
       { role: "user", content: safeQuery },
     ],
